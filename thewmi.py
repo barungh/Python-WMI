@@ -1,15 +1,6 @@
 import wmi
 
-# conn = wmi.WMI("192.168.0.108", user=r"tej", password="tej@108")
 conn = wmi.WMI()
-
-# for class_name in conn.classes:
-    # if 'Process' in class_name:
-    # print(class_name)
-
-# print(wmi.WMI().Win32_Process.methods.keys())
-# print(wmi.WMI().Win32_Process.properties.keys())
-
 
 def comp_info():
     cs = conn.Win32_Computersystem()[0]
@@ -25,76 +16,57 @@ def comp_info():
             cs.SystemFamily,
             cs.SystemSKUNumber,
             cs.SystemType,
-            cs.TotalPhysicalMemory,
+            ("{:.2f}".format(int(cs.TotalPhysicalMemory)/1024/1024/1024)),
             cs.UserName,
             cs.Workgroup
             ]
 
+def os_info():
+    n = conn.Win32_OperatingSystem()
+    os_name = n[0].Caption
+    version = n[0].BuildNumber
+    host = n[0].CSName
+    free_mem = n[0].FreePhysicalMemory
+    free_mem = "{:.2f}".format((int(free_mem))/1024/1024)
+    os_arc = n[0].OSArchitecture
+    userName = n[0].RegisteredUser
+    system_drive = n[0].SystemDrive
 
-for i in (comp_info()):
-    print(i)
+    return [os_name, version, host, free_mem, os_arc, userName, system_drive]
 
-# for i in conn.Win32_LogicalDisk():
-#     print(i)
+def b_board():
+    m = conn.Win32_Baseboard()[0].Manufacturer
+    p = conn.Win32_Baseboard()[0].Product
+    s = conn.Win32_Baseboard()[0].SerialNumber
+    return [m,p,s]
 
-# l = conn.Win32_LogicalDisk()
-#
-# t = l[0]
-#
-# print(t.DeviceID)
+def net_info():
+    n = conn.Win32_NetworkAdapterConfiguration()
+    for i in n:
+        if i.IPEnabled:
+            d = i.Description
+            ip = i.IPAddress[0]
+            mac = i.MACAddress
+            return [d, ip, mac]
 
-# print(type(l))
-#
-# print(len(l))
-#
-# print(type(l[0]), type(l[1]))
+def hdd_info():
+    disk_info = {}
 
-# for i in conn.Win32_Baseboard():
-#     print(i.properties)
+    for i in conn.Win32_LogicalDisk():
+        caption = i.Caption
+        Did = i.DeviceID
+        free = i.FreeSpace
+        name = i.Name
+        size = i.Size
+        vName = i.VolumeName
+        freePercent = "{:.2f}%".format((int(free) / int(size))*100)
+        disk_info[Did] = [caption, Did, free, name, size, vName, freePercent]
 
-# for n in conn.Win32_OperatingSystem():
-#     print(n)
-# n = conn.Win32_OperatingSystem()
-# print(n[0])
+    return disk_info
 
-# def os_info():
-#     n = conn.Win32_OperatingSystem()
-#     os_name = n[0].Caption
-#     version = n[0].BuildNumber
-#     host = n[0].CSName
-#     free_mem = n[0].FreePhysicalMemory
-#     free_mem = "{:.2f}".format((int(free_mem))/1024/1024)
-#     os_arc = n[0].OSArchitecture
-#     userName = n[0].RegisteredUser
-#     system_drive = n[0].SystemDrive
-#
-#     return [os_name, version, host, free_mem, os_arc, userName, system_drive]
-#
-# for i in (os_info()):
-#     print((i))
+def sys_drive_check():
+    sys_drive = os_info()[-1]
+    for key, value in hdd_info().items():
+        if (key == sys_drive):
 
-
-# def b_board():
-#     m = conn.Win32_Baseboard()[0].Manufacturer
-#     p = conn.Win32_Baseboard()[0].Product
-#     s = conn.Win32_Baseboard()[0].SerialNumber
-#     return [m,p,s]
-#
-# print(b_board())
-
-# bb = conn.Win32_Baseboard()
-# print(bb[0].Product)
-
-# n = conn.Win32_NetworkAdapterConfiguration()
-
-# print("Description", "\t\t\t", "Status")
-# for i in n:
-#     if i.IPEnabled:
-#         d = i.Description
-#         ip = i.IPAddress[0]
-#         mac = i.MACAddress
-#         print(d, ip, mac)
-#         print(type(d), type(ip), type(mac))
-
-        # print(i.Description, "\n", i.IPAddress[0], "\n", i.MACAddress, "\n")
-        # print(i.Description, "\t\t\t", i.IPEnabled)
+            return value[-1]
