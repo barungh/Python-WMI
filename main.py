@@ -41,37 +41,3 @@ def output_excel():
     return
 
 output_excel()
-
-
-
-def output():
-    oi = os_info()
-
-    os = oi[0]
-    version = oi[1]
-    hostname = oi[2]
-    os_arch = oi[4]
-    reg_user = oi[5]
-
-    ci = comp_info()
-    part_of_domain = ci[6]
-    sys_arch = ci[10]
-    total_mem = ci[11]
-
-    bbi = b_board()
-    sn = bbi[-1]
-    make = bbi[0]
-    model = bbi[1]
-
-    ninfo = net_info()
-
-    ip = ninfo[1]
-    mac = ninfo[2]
-
-    sys_drive_status = sys_drive_check()
-
-    return [sn, make, model, hostname, os, version, os_arch, sys_arch, reg_user, ip, mac, sys_drive_status, part_of_domain, total_mem]
-
-# for i in output():
-#     print(i)
-
