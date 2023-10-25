@@ -1,8 +1,16 @@
 from openpyxl import Workbook
 from thewmi import comp_info, os_info, b_board, net_info, sys_drive_check
+from requests import get
 
 n = input("Input excel file name to save data : ")
 filename = f'{n}.xlsx'
+
+public_IP = None
+
+try:
+    public_IP = get('https://api.ipify.org').text
+except:
+    public_IP = "N/A"
 
 
 def output_excel():
@@ -33,6 +41,7 @@ def output_excel():
     ninfo = net_info()
     sa("IP Address", ninfo[1])
     sa("MAC", ninfo[2])
+    sa("Public IP", public_IP )
 
     sa("OS Drive free ", sys_drive_check())
 
